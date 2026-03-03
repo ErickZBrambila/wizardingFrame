@@ -48,18 +48,35 @@ html, body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* Subtle breathing scale — the portrait is "alive" */
-  animation: breathe 20s ease-in-out infinite;
 }
 
-/* The key Harry Potter effect: photos very slowly pan and breathe */
-@keyframes breathe {
-  0%   { transform: scale(1.02) translate(0px, 0px); }
-  25%  { transform: scale(1.04) translate(-3px, -2px); }
-  50%  { transform: scale(1.03) translate(2px, 1px); }
-  75%  { transform: scale(1.05) translate(-1px, 3px); }
-  100% { transform: scale(1.02) translate(0px, 0px); }
+/* Harry Potter Ken Burns — randomised direction per slide, assigned by JS */
+@keyframes kb-tl {
+  0%   { transform: scale(1.12) translate(3%, 3%); }
+  100% { transform: scale(1.0)  translate(0%,  0%); }
 }
+@keyframes kb-tr {
+  0%   { transform: scale(1.12) translate(-3%, 3%); }
+  100% { transform: scale(1.0)  translate(0%,  0%); }
+}
+@keyframes kb-bl {
+  0%   { transform: scale(1.12) translate(3%, -3%); }
+  100% { transform: scale(1.0)  translate(0%,  0%); }
+}
+@keyframes kb-br {
+  0%   { transform: scale(1.12) translate(-3%, -3%); }
+  100% { transform: scale(1.0)  translate(0%,  0%); }
+}
+@keyframes kb-zoom {
+  0%   { transform: scale(1.0); }
+  100% { transform: scale(1.12); }
+}
+
+.kb-tl   { animation: kb-tl   var(--kb-dur, 14s) ease-in-out forwards; }
+.kb-tr   { animation: kb-tr   var(--kb-dur, 14s) ease-in-out forwards; }
+.kb-bl   { animation: kb-bl   var(--kb-dur, 14s) ease-in-out forwards; }
+.kb-br   { animation: kb-br   var(--kb-dur, 14s) ease-in-out forwards; }
+.kb-zoom { animation: kb-zoom var(--kb-dur, 14s) ease-in-out forwards; }
 
 /* ─── Effects Canvas (grain + vignette rendered here) ────────────────────── */
 .fx-canvas {

@@ -64,12 +64,44 @@ Visit the URL shown in the terminal (e.g. `http://192.168.1.42:3000`) from any d
 
 ## 🍎 Convert Apple Live Photos
 
+Live Photos become seamless bounce-loop videos — the real Harry Potter portrait effect.
+
+### Step 1 — Export from your Mac's Photos app (preserves the motion)
+
+> **Important:** AirDrop sends only the still HEIC — the motion component is stripped.
+> You must export as Unmodified Original to keep both files.
+
+1. Open **Photos** on your Mac
+2. Select the Live Photos you want
+3. **File → Export → Export Unmodified Original**
+4. Save them anywhere (e.g. Desktop)
+5. Move/copy the exported folder contents into `media/`
+
+Each Live Photo exports as a pair: `IMG_XXXX.HEIC` + `IMG_XXXX.MOV`
+
+### Step 2 — Install ffmpeg (one time)
+
 ```bash
-# Install ffmpeg first (macOS: brew install ffmpeg)
-node pipeline/convert.js --input ~/path/to/LivePhotos --output ./media
+# macOS
+brew install ffmpeg
+
+# Raspberry Pi / Linux
+sudo apt install ffmpeg
 ```
 
-Live Photos will be converted into smooth bounce-loop videos — exactly the Harry Potter effect.
+### Step 3 — Run the pipeline
+
+```bash
+npm run pipeline
+```
+
+That's it. The pipeline:
+- Detects HEIC + MOV pairs automatically
+- Converts each pair into a smooth `_loop.mp4` bounce video
+- Deletes the originals so only the loop plays
+- Your frame reloads instantly (no restart needed)
+
+> For custom input/output paths: `node pipeline/convert.js --input ./my-folder --output ./media`
 
 ---
 

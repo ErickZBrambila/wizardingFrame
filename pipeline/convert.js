@@ -21,8 +21,9 @@ const fs = require('fs');
 // ─── Config ───────────────────────────────────────────────────────────────────
 
 const CONFIG = {
-  // Output resolution (width x height). null = keep original
+  // Output resolution — WxH display string; resFilter is the ffmpeg filter-safe version
   resolution: '1920x1080',
+  get resFilter() { return this.resolution.replace('x', ':'); },
 
   // Output format: 'mp4' or 'webm' (webm = smaller, better for web)
   format: 'mp4',
@@ -100,7 +101,7 @@ function detectLivePhotoGroup(files) {
  * Convert a Live Photo (video component) into a seamlessly looping video.
  * The "bounce" technique plays forward then reverse — very smooth magical effect.
  */
-function convertLivePhoto(videoPath, outputDir) {
+function convertLivePhoto(videoPath, outputDir, imagePath = null) {
   const base = path.basename(videoPath, path.extname(videoPath));
   const outputPath = path.join(outputDir, `${base}_loop.mp4`);
 
@@ -112,9 +113,9 @@ function convertLivePhoto(videoPath, outputDir) {
     // Forward + reverse = seamless bounce loop
     // Slow to targetDuration, apply gentle smoothing
     ffmpegCmd = `ffmpeg -y -i "${videoPath}" \
-      -filter_complex "[0:v]setpts=${CONFIG.targetDuration / 3}*PTS,scale=${CONFIG.resolution}:flags=lanczos[fwd]; \
-                       [fwd]reverse[rev]; \
-                       [fwd][rev]concat=n=2:v=1:a=0[out]" \
+      -filter_complex "[0:v]setpts=${CONFIG.targetDuration / 3}*PTS,scale=${CONFIG.resFilter}:flags=lanczos,split[fwd1][fwd2]; \
+                       [fwd2]reverse[rev]; \
+                       [fwd1][rev]concat=n=2:v=1:a=0[out]" \
       -map "[out]" \
       -c:v libx264 -crf ${CONFIG.quality} -preset slow \
       -profile:v high -pix_fmt yuv420p \
@@ -123,7 +124,7 @@ function convertLivePhoto(videoPath, outputDir) {
   } else {
     // Simple loop
     ffmpegCmd = `ffmpeg -y -i "${videoPath}" \
-      -vf "scale=${CONFIG.resolution}:flags=lanczos,setpts=${CONFIG.targetDuration / 3}*PTS" \
+      -vf "scale=${CONFIG.resFilter}:flags=lanczos,setpts=${CONFIG.targetDuration / 3}*PTS" \
       -c:v libx264 -crf ${CONFIG.quality} -preset slow \
       -profile:v high -pix_fmt yuv420p \
       -movflags +faststart \
@@ -133,6 +134,9 @@ function convertLivePhoto(videoPath, outputDir) {
   try {
     execSync(ffmpegCmd, { stdio: 'inherit' });
     console.log(`✅ Done: ${outputPath}`);
+    // Remove originals so only the loop video plays in the frame
+    fs.unlinkSync(videoPath);
+    if (imagePath && fs.existsSync(imagePath)) fs.unlinkSync(imagePath);
     return outputPath;
   } catch (err) {
     console.error(`❌ Failed: ${videoPath}`, err.message);
@@ -152,7 +156,7 @@ function optimizeVideo(videoPath, outputDir) {
   console.log(`🎬  Optimizing video: ${path.basename(videoPath)}`);
 
   const cmd = `ffmpeg -y -i "${videoPath}" \
-    -vf "scale=${CONFIG.resolution}:flags=lanczos" \
+    -vf "scale=${CONFIG.resFilter}:flags=lanczos" \
     -c:v libx264 -crf ${CONFIG.quality} -preset slow \
     -profile:v high -pix_fmt yuv420p \
     -an -movflags +faststart \
@@ -176,7 +180,7 @@ function optimizeImage(imagePath, outputDir) {
   console.log(`🖼️   Optimizing image: ${path.basename(imagePath)}`);
 
   const cmd = `ffmpeg -y -i "${imagePath}" \
-    -vf "scale=${CONFIG.resolution}:flags=lanczos:force_original_aspect_ratio=decrease,pad=${CONFIG.resolution}:(ow-iw)/2:(oh-ih)/2:black" \
+    -vf "scale=${CONFIG.resFilter}:flags=lanczos:force_original_aspect_ratio=decrease,pad=${CONFIG.resFilter}:(ow-iw)/2:(oh-ih)/2:black" \
     -q:v 2 \
     "${outputPath}"`;
 
@@ -195,7 +199,7 @@ function main() {
   const inputIdx = args.indexOf('--input');
   const outputIdx = args.indexOf('--output');
 
-  const inputPath  = inputIdx >= 0 ? args[inputIdx + 1] : './import';
+  const inputPath  = inputIdx >= 0 ? args[inputIdx + 1] : './media';
   const outputPath = outputIdx >= 0 ? args[outputIdx + 1] : './media';
 
   checkFFmpeg();
@@ -219,7 +223,7 @@ function main() {
   console.log(`Found: ${livePhotos.length} Live Photos, ${standalone.length} standalone files\n`);
 
   // Process Live Photos
-  livePhotos.forEach(({ video }) => convertLivePhoto(video, outputPath));
+  livePhotos.forEach(({ video, image }) => convertLivePhoto(video, outputPath, image));
 
   // Process standalone files
   standalone.forEach(file => {

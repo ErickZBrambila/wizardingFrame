@@ -158,6 +158,14 @@ class WizardingFramePlayer {
     img.src = item.url;
     img.alt = '';
     img.draggable = false;
+
+    // Random Ken Burns direction — the HP portrait "alive" effect
+    const kbClasses = ['kb-tl', 'kb-tr', 'kb-bl', 'kb-br', 'kb-zoom'];
+    const kb = kbClasses[Math.floor(Math.random() * kbClasses.length)];
+    const dur = Math.round(this.config.slideDuration / 1000);
+    img.style.setProperty('--kb-dur', `${dur}s`);
+    img.classList.add(kb);
+
     return img;
   }
 
