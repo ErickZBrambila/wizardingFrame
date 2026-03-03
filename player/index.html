@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-fullscreen">
+  <title>WizardingFrame</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="/styles/player.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Ornate SVG frame (injected by JS per mode) -->
+  <div id="frame-overlay" class="frame-overlay"></div>
+
+  <!-- Two-slot crossfade stage -->
+  <div id="stage" class="stage">
+    <div id="slot-a" class="media-slot active"></div>
+    <div id="slot-b" class="media-slot"></div>
+  </div>
+
+  <!-- Film grain + vignette canvas -->
+  <canvas id="fx-canvas" class="fx-canvas"></canvas>
+
+  <!-- Empty state -->
+  <div id="empty-state" class="empty-state hidden">
+    <div class="empty-content">
+      <div class="wand-icon">🪄</div>
+      <h1>WizardingFrame</h1>
+      <p>Drop photos or videos into the <code>media/</code> folder<br>to bring your portraits to life.</p>
+      <p class="sub">Or visit <strong>/upload.html</strong> from any device on your network.</p>
+    </div>
+  </div>
+
+  <!-- Mode label flash -->
+  <div id="mode-label" class="mode-label hidden"></div>
+
+  <!-- Load order matters: effects → modes → player -->
+  <script src="/effects/grain.js"></script>
+  <script src="/modes/wizarding.js"></script>
+  <script src="/modes/botanica.js"></script>
+  <script src="/player.js"></script>
+</body>
+</html>

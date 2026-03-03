@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>WizardingFrame — Upload</title>
+  <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gold: #c9a84c;
+      --gold-light: #f5d98b;
+      --dark: #0d0900;
+      --card: #1a1105;
+      --border: #3d2800;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: radial-gradient(ellipse at top, #1a0e00, #000);
+      color: #e8d5a3;
+      font-family: 'IM Fell English', Georgia, serif;
+      padding: 2rem 1rem;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .header h1 {
+      font-size: 2rem;
+      color: var(--gold);
+      text-shadow: 0 0 30px rgba(201,168,76,0.4);
+      letter-spacing: 0.1em;
+    }
+
+    .header p {
+      margin-top: 0.5rem;
+      opacity: 0.6;
+      font-style: italic;
+      font-size: 0.95rem;
+    }
+
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 3rem 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: var(--card);
+      max-width: 500px;
+      margin: 0 auto 2rem;
+    }
+
+    .upload-zone.dragover {
+      border-color: var(--gold);
+      background: rgba(201,168,76,0.08);
+      transform: scale(1.01);
+    }
+
+    .upload-zone .icon { font-size: 3rem; margin-bottom: 1rem; display: block; }
+
+    .upload-zone h2 {
+      font-size: 1.2rem;
+      color: var(--gold-light);
+      margin-bottom: 0.5rem;
+    }
+
+    .upload-zone p {
+      font-size: 0.85rem;
+      opacity: 0.5;
+      font-style: italic;
+    }
+
+    #file-input { display: none; }
+
+    .btn {
+      display: inline-block;
+      margin-top: 1.2rem;
+      padding: 0.6rem 1.8rem;
+      background: linear-gradient(135deg, #8b6914, #c9a84c, #8b6914);
+      color: #1a0900;
+      font-family: 'IM Fell English', Georgia, serif;
+      font-size: 1rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      letter-spacing: 0.05em;
+      transition: opacity 0.2s;
+    }
+
+    .btn:hover { opacity: 0.85; }
+    .btn:disabled { opacity: 0.4; cursor: default; }
+
+    /* Queue */
+    .queue {
+      max-width: 500px;
+      margin: 0 auto 2rem;
+    }
+
+    .queue-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.65rem 0.9rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .queue-item .name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .queue-item .size { opacity: 0.4; font-size: 0.78rem; }
+    .queue-item .status { font-size: 1.1rem; min-width: 1.4rem; text-align: center; }
+
+    .progress-bar {
+      height: 3px;
+      background: var(--border);
+      border-radius: 2px;
+      margin-top: 0.4rem;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--gold);
+      border-radius: 2px;
+      width: 0%;
+      transition: width 0.3s;
+    }
+
+    /* Media library */
+    .library {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .library h3 {
+      color: var(--gold);
+      font-size: 1rem;
+      letter-spacing: 0.1em;
+      margin-bottom: 1rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .library-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+    }
+
+    .library-item {
+      aspect-ratio: 1;
+      border-radius: 6px;
+      overflow: hidden;
+      position: relative;
+      background: var(--card);
+      border: 1px solid var(--border);
+    }
+
+    .library-item img,
+    .library-item video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .library-item .delete-btn {
+      position: absolute;
+      top: 4px; right: 4px;
+      background: rgba(0,0,0,0.7);
+      border: none;
+      color: #ff6b6b;
+      border-radius: 50%;
+      width: 22px; height: 22px;
+      cursor: pointer;
+      font-size: 12px;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+
+    .library-item:hover .delete-btn { opacity: 1; }
+
+    .library-item .type-badge {
+      position: absolute;
+      bottom: 4px; left: 4px;
+      background: rgba(0,0,0,0.6);
+      color: var(--gold);
+      font-size: 0.6rem;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-family: monospace;
+    }
+
+    .empty-library {
+      text-align: center;
+      padding: 2rem;
+      opacity: 0.4;
+      font-style: italic;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(4rem);
+      background: #1a1105;
+      border: 1px solid var(--gold);
+      color: var(--gold-light);
+      padding: 0.7rem 1.5rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      transition: transform 0.3s;
+      z-index: 100;
+    }
+
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    a.back-link {
+      display: block;
+      text-align: center;
+      color: var(--gold);
+      opacity: 0.5;
+      font-size: 0.85rem;
+      margin-top: 2rem;
+      text-decoration: none;
+    }
+    a.back-link:hover { opacity: 0.9; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>🪄 WizardingFrame</h1>
+    <p>Upload photos & videos to your frame</p>
+  </div>
+
+  <!-- Drop Zone -->
+  <div class="upload-zone" id="drop-zone">
+    <span class="icon">📸</span>
+    <h2>Drop files here</h2>
+    <p>JPG, PNG, MP4, MOV, WebM, GIF supported</p>
+    <button class="btn" onclick="document.getElementById('file-input').click()">
+      Choose Files
+    </button>
+    <input type="file" id="file-input" multiple accept=".jpg,.jpeg,.png,.mp4,.mov,.webm,.gif,.webp">
+  </div>
+
+  <!-- Upload queue -->
+  <div class="queue" id="queue"></div>
+
+  <!-- Media library -->
+  <div class="library">
+    <h3>📁 Current Media</h3>
+    <div class="library-grid" id="library-grid">
+      <div class="empty-library">Loading...</div>
+    </div>
+  </div>
+
+  <a href="/" class="back-link">← Back to frame</a>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const dropZone   = document.getElementById('drop-zone');
+    const fileInput  = document.getElementById('file-input');
+    const queue      = document.getElementById('queue');
+    const libraryGrid = document.getElementById('library-grid');
+    const toast      = document.getElementById('toast');
+
+    // ─── Drag & Drop ──────────────────────────────────────────────────────────
+
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      uploadFiles(Array.from(e.dataTransfer.files));
+    });
+
+    fileInput.addEventListener('change', () => {
+      uploadFiles(Array.from(fileInput.files));
+      fileInput.value = '';
+    });
+
+    // ─── Upload ───────────────────────────────────────────────────────────────
+
+    function formatBytes(bytes) {
+      if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)}KB`;
+      return `${(bytes / 1024 / 1024).toFixed(1)}MB`;
+    }
+
+    function uploadFiles(files) {
+      files.forEach(file => uploadFile(file));
+    }
+
+    function uploadFile(file) {
+      const id   = Date.now() + Math.random();
+      const item = document.createElement('div');
+      item.className = 'queue-item';
+      item.id = `q-${id}`;
+      item.innerHTML = `
+        <span class="status">⏳</span>
+        <span class="name">${file.name}</span>
+        <span class="size">${formatBytes(file.size)}</span>
+        <div class="progress-bar"><div class="progress-fill" id="p-${id}"></div></div>
+      `;
+      queue.prepend(item);
+
+      const formData = new FormData();
+      formData.append('files', file);
+
+      const xhr = new XMLHttpRequest();
+
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          const pct = (e.loaded / e.total * 100).toFixed(0);
+          const bar = document.getElementById(`p-${id}`);
+          if (bar) bar.style.width = pct + '%';
+        }
+      };
+
+      xhr.onload = () => {
+        const status = item.querySelector('.status');
+        if (xhr.status === 200) {
+          status.textContent = '✅';
+          showToast('Uploaded! Frame will update.');
+          loadLibrary();
+          setTimeout(() => item.remove(), 3000);
+        } else {
+          status.textContent = '❌';
+          showToast('Upload failed: ' + xhr.statusText);
+        }
+      };
+
+      xhr.onerror = () => {
+        item.querySelector('.status').textContent = '❌';
+        showToast('Network error');
+      };
+
+      xhr.open('POST', '/api/upload');
+      xhr.send(formData);
+    }
+
+    // ─── Library ──────────────────────────────────────────────────────────────
+
+    async function loadLibrary() {
+      try {
+        const res = await fetch('/api/media');
+        const data = await res.json();
+
+        if (!data.files || data.files.length === 0) {
+          libraryGrid.innerHTML = '<div class="empty-library">No media yet — upload something!</div>';
+          return;
+        }
+
+        libraryGrid.innerHTML = '';
+        data.files.forEach(file => {
+          const item = document.createElement('div');
+          item.className = 'library-item';
+
+          const ext = file.name.split('.').pop().toLowerCase();
+          const isVideo = ['mp4', 'webm', 'mov'].includes(ext);
+
+          item.innerHTML = `
+            ${isVideo
+              ? `<video src="${file.url}" muted loop preload="metadata"></video>`
+              : `<img src="${file.url}" loading="lazy" alt="${file.name}">`
+            }
+            <button class="delete-btn" title="Delete" onclick="deleteFile('${encodeURIComponent(file.name)}', this)">✕</button>
+            <span class="type-badge">${ext.toUpperCase()}</span>
+          `;
+          libraryGrid.appendChild(item);
+        });
+      } catch (err) {
+        libraryGrid.innerHTML = '<div class="empty-library">Could not load media</div>';
+      }
+    }
+
+    async function deleteFile(encodedName, btn) {
+      if (!confirm(`Delete ${decodeURIComponent(encodedName)}?`)) return;
+      try {
+        const res = await fetch(`/api/media/${encodedName}`, { method: 'DELETE' });
+        if (res.ok) {
+          btn.closest('.library-item').remove();
+          showToast('Deleted');
+        }
+      } catch {
+        showToast('Could not delete file');
+      }
+    }
+
+    // ─── Toast ────────────────────────────────────────────────────────────────
+
+    let toastTimer;
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    // Init
+    loadLibrary();
+
+    // Live update via WebSocket
+    const ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}`);
+    ws.onmessage = (e) => {
+      try {
+        const msg = JSON.parse(e.data);
+        if (msg.type === 'media-changed') loadLibrary();
+      } catch {}
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "mode": "wizarding",
+  "slideDuration": 12000,
+  "transitionDuration": 2000,
+  "effects": {
+    "grain": true,
+    "vignette": true,
+    "colorGrade": true,
+    "frameOverlay": true,
+    "scanlines": false
+  },
+  "brightness": 0.9,
+  "grainIntensity": 0.04,
+  "vignetteIntensity": 0.6,
+  "shuffle": true,
+  "loop": true
+}

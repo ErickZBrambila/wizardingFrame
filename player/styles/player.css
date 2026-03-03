@@ -1,0 +1,220 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   WizardingFrame — Player Styles
+   Aesthetic: Aged parchment meets silver nitrate film. Warm, dim, alive.
+═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --gold:        #c9a84c;
+  --gold-deep:   #8b6914;
+  --parchment:   #f4e4c1;
+  --ink:         #1a1208;
+  --ember:       #ff6b35;
+  --transition:  2000ms;
+  --grain:       0.04;
+  --vignette:    0.6;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: #000;
+  cursor: none; /* kiosk mode */
+}
+
+/* ─── Stage ──────────────────────────────────────────────────────────────── */
+.stage {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+}
+
+.media-slot {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity var(--transition) ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+}
+
+.media-slot.active { opacity: 1; }
+
+.media-slot img,
+.media-slot video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Subtle breathing scale — the portrait is "alive" */
+  animation: breathe 20s ease-in-out infinite;
+}
+
+/* The key Harry Potter effect: photos very slowly pan and breathe */
+@keyframes breathe {
+  0%   { transform: scale(1.02) translate(0px, 0px); }
+  25%  { transform: scale(1.04) translate(-3px, -2px); }
+  50%  { transform: scale(1.03) translate(2px, 1px); }
+  75%  { transform: scale(1.05) translate(-1px, 3px); }
+  100% { transform: scale(1.02) translate(0px, 0px); }
+}
+
+/* ─── Effects Canvas (grain + vignette rendered here) ────────────────────── */
+.fx-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
+  opacity: 0.85;
+  mix-blend-mode: multiply;
+}
+
+/* ─── Frame Overlay ──────────────────────────────────────────────────────── */
+.frame-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+  /* SVG ornate frame injected via JS */
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+
+/* Wizarding mode: warm amber tone over the whole image */
+body.mode-wizarding .media-slot img,
+body.mode-wizarding .media-slot video {
+  filter: sepia(0.3) brightness(0.88) contrast(1.08) saturate(0.9);
+}
+
+/* Botanica mode: fresh, cool, slightly desaturated */
+body.mode-botanica .media-slot img,
+body.mode-botanica .media-slot video {
+  filter: saturate(0.85) brightness(0.92) contrast(1.05) hue-rotate(5deg);
+}
+
+/* Zen mode: desaturated, calm */
+body.mode-zen .media-slot img,
+body.mode-zen .media-slot video {
+  filter: saturate(0.6) brightness(0.85) contrast(1.1);
+}
+
+/* Family mode: warm, bright, loving */
+body.mode-family .media-slot img,
+body.mode-family .media-slot video {
+  filter: sepia(0.15) brightness(0.95) contrast(1.02) saturate(1.1);
+}
+
+/* ─── Vignette (CSS fallback — canvas version is prettier) ──────────────── */
+.stage::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 40%,
+    rgba(0,0,0,0.5) 100%
+  );
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* ─── Empty State ────────────────────────────────────────────────────────── */
+.empty-state {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at center, #1a0e00 0%, #000 100%);
+}
+
+.empty-state.hidden { display: none; }
+
+.empty-content {
+  text-align: center;
+  color: var(--parchment);
+  font-family: 'IM Fell English', Georgia, serif;
+}
+
+.empty-content .wand-icon {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+  display: block;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.empty-content h1 {
+  font-size: clamp(2rem, 5vw, 4rem);
+  color: var(--gold);
+  letter-spacing: 0.1em;
+  text-shadow: 0 0 40px rgba(201,168,76,0.5);
+  margin-bottom: 1rem;
+}
+
+.empty-content p {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  opacity: 0.8;
+  font-style: italic;
+}
+
+.empty-content .sub {
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  opacity: 0.5;
+  font-style: normal;
+  font-family: monospace;
+}
+
+.empty-content code {
+  background: rgba(201,168,76,0.15);
+  padding: 0.1em 0.4em;
+  border-radius: 3px;
+  color: var(--gold);
+}
+
+/* ─── Mode Label Flash ───────────────────────────────────────────────────── */
+.mode-label {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  font-family: 'IM Fell English', Georgia, serif;
+  font-size: 1rem;
+  letter-spacing: 0.2em;
+  color: var(--gold);
+  text-transform: uppercase;
+  opacity: 0;
+  text-shadow: 0 0 20px var(--gold);
+  transition: opacity 0.5s;
+}
+
+.mode-label.visible { opacity: 0.7; }
+.mode-label.hidden { display: none; }
+
+/* ─── Scanlines (optional retro effect) ─────────────────────────────────── */
+body.fx-scanlines::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 15;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.03) 2px,
+    rgba(0,0,0,0.03) 4px
+  );
+}
