@@ -1,4 +1,4 @@
-# 🪄 WizardingFrame
+# WizardingFrame
 
 > *"The portraits move here." — Every Hogwarts student, ever.*
 
@@ -10,20 +10,19 @@ WizardingFrame turns any screen into a living, breathing magical portrait — ju
 
 ---
 
-## ✨ What It Does
+## What It Does
 
-- 🖼️ Seamless looping slideshow of photos & videos  
-- 🎞️ Cinematic effects: film grain, vignette, warm color grading, ornate frame overlays  
-- 📱 Converts Apple Live Photos into smooth looping animations  
-- 🍎 **Botanica Mode** — ambient fruit, plants & nature (perfect screensaver)  
-- 🧙 **Wizarding Mode** — full Harry Potter portrait aesthetic  
-- 🌊 **Zen / Family modes** — more coming  
-- 🔴 **Live reload** — drop a file in the `media/` folder and it appears instantly, no restart  
+- Seamless looping slideshow of photos & videos
+- Cinematic effects: film grain, vignette, warm color grading
+- Converts Apple Live Photos into smooth looping animations
+- **Wizarding Mode** — full Harry Potter portrait aesthetic
+- **Live reload** — drop a file in the `media/` folder and it appears instantly, no restart
 
-## 🖥️ Runs On Everything
+## Runs On Everything
 
 | Device | How |
 |--------|-----|
+| **macOS** | Native screensaver (`.saver` bundle) |
 | **Raspberry Pi 4/5** + display | Chromium kiosk mode (recommended) |
 | **Old iPad / Android tablet** | PWA — add to home screen |
 | **Any laptop / desktop** | Just open a browser tab |
@@ -31,42 +30,60 @@ WizardingFrame turns any screen into a living, breathing magical portrait — ju
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
-### macOS / Linux
+### macOS Screensaver
+
+The easiest way to run WizardingFrame on a Mac:
+
+1. Build the screensaver:
+   ```bash
+   cd screensaver && ./build.sh
+   ```
+   Requires Xcode Command Line Tools (`xcode-select --install`).
+
+2. Double-click `screensaver/WizardingFrame.saver` to install.
+
+3. Open **System Settings → Screen Saver**, select **WizardingFrame**, click **Options** to choose your media folder:
+   - **iCloud Drive:** `~/Library/Mobile Documents/com~apple~CloudDocs/WizardingFrame/`
+   - **Local:** any folder you pick (defaults to `~/Pictures/WizardingFrame/`)
+
+### Node.js Server (all platforms)
+
+#### macOS / Linux
 ```bash
-git clone https://github.com/yourusername/wizardingframe.git
-cd wizardingframe
+git clone https://github.com/ErickZBrambila/wizardingFrame.git
+cd wizardingFrame
 bash setup.sh
 npm start
 ```
 
-### Windows (PowerShell)
+#### Windows (PowerShell)
 ```powershell
-git clone https://github.com/yourusername/wizardingframe.git
-cd wizardingframe
+git clone https://github.com/ErickZBrambila/wizardingFrame.git
+cd wizardingFrame
 .\setup.ps1
 npm start
 ```
-> If you see an execution policy error, first run:  
+> If you see an execution policy error, first run:
 > `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`
 
-### Then
-1. Drop photos/videos into the `media/` folder  
-2. Open **http://localhost:3000** — the browser opens automatically  
-3. To upload from your phone: open **http://[your-computer-ip]:3000/upload.html**  
+#### Then
+1. Drop photos/videos into the `media/` folder
+2. Open **http://localhost:3000** — the browser opens automatically
+3. To upload from your phone: open **http://[your-computer-ip]:3000/upload.html**
 
 ---
 
-## 📱 Upload From Your Phone
+## Upload From Your Phone
 
 Visit the URL shown in the terminal (e.g. `http://192.168.1.42:3000`) from any device on your WiFi network. The upload page has drag-and-drop and shows your current media library.
 
-## 🍎 Convert Apple Live Photos
+## Convert Apple Live Photos
 
 Live Photos become seamless bounce-loop videos — the real Harry Potter portrait effect.
 
-### Step 1 — Export from your Mac's Photos app (preserves the motion)
+### Step 1 — Export from your Mac's Photos app
 
 > **Important:** AirDrop sends only the still HEIC — the motion component is stripped.
 > You must export as Unmodified Original to keep both files.
@@ -95,7 +112,7 @@ sudo apt install ffmpeg
 npm run pipeline
 ```
 
-That's it. The pipeline:
+The pipeline:
 - Detects HEIC + MOV pairs automatically
 - Converts each pair into a smooth `_loop.mp4` bounce video
 - Deletes the originals so only the loop plays
@@ -105,63 +122,68 @@ That's it. The pipeline:
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
-wizardingframe/
-├── server/          # Node.js — serves media, handles uploads, WebSocket
-├── player/          # The display web app
-│   ├── effects/     # Film grain + vignette canvas renderer
-│   ├── modes/       # Wizarding, Botanica modes (frame overlays + color grades)
-│   ├── styles/      # CSS (animations, crossfade, mode filters)
-│   ├── index.html   # Main frame display
-│   └── upload.html  # Upload UI (phone-friendly)
-├── pipeline/        # ffmpeg: Live Photos → looping video
-├── config/          # frame.json — your settings
-├── docs/            # Raspberry Pi + iPad setup guides
-├── media/           # Drop your content here (gitignored)
-├── setup.sh         # Setup script for macOS/Linux/Pi
-└── setup.ps1        # Setup script for Windows
+wizardingFrame/
+├── screensaver/         # macOS .saver bundle (Swift + WKWebView)
+│   ├── Sources/         # Swift source: WizardingFrameView, MediaSchemeHandler, ConfigureSheet
+│   ├── build.sh         # Build script → WizardingFrame.saver
+│   └── WizardingFrame.saver/
+├── server/              # Node.js — serves media, handles uploads, WebSocket
+├── player/              # The display web app
+│   ├── effects/         # Film grain + vignette canvas renderer
+│   ├── modes/           # Wizarding mode (color grade + effects)
+│   ├── styles/          # CSS (animations, crossfade, mode filters)
+│   ├── index.html       # Main frame display
+│   └── upload.html      # Upload UI (phone-friendly)
+├── pipeline/            # ffmpeg: Live Photos → looping video
+├── config/              # frame.json — your settings
+├── docs/                # Raspberry Pi + iPad setup guides
+├── media/               # Drop your content here (gitignored)
+├── setup.sh             # Setup script for macOS/Linux/Pi
+└── setup.ps1            # Setup script for Windows
 ```
 
 ---
 
-## 🗺️ Roadmap
+## Roadmap
 
 ### Phase 1 — Foundation ✅
-- [x] Project scaffold + architecture  
-- [x] Core web player with smooth crossfade  
-- [x] Film grain + vignette effects  
-- [x] Wizarding Mode (gold frame overlay + warm color grade)  
-- [x] Botanica Mode (wood frame + botanical tones)  
-- [x] Live folder watching (drop file → appears on frame)  
-- [x] Upload page (phone-friendly, drag & drop)  
-- [x] macOS + Windows + Pi setup scripts  
+- [x] Project scaffold + architecture
+- [x] Core web player with smooth crossfade
+- [x] Film grain + vignette effects
+- [x] Wizarding Mode (warm color grade + cinematic effects)
+- [x] Live folder watching (drop file → appears on frame)
+- [x] Upload page (phone-friendly, drag & drop)
+- [x] macOS + Windows + Pi setup scripts
 
-### Phase 2 — Content Pipeline
-- [ ] Live Photo → looping video converter (ffmpeg wrapper)  
-- [ ] Web UI for managing config / switching modes  
-- [ ] HEIC/HEIF image support  
+### Phase 2 — Content Pipeline & macOS ✅
+- [x] Live Photo → looping video converter (ffmpeg wrapper) with Ken Burns effect
+- [x] macOS native screensaver (.saver bundle, Swift + WKWebView)
+- [x] iCloud Drive + local media folder support in screensaver
+- [ ] Web UI for managing config / switching modes
+- [ ] HEIC/HEIF image support
 
 ### Phase 3 — Hardware
-- [ ] Raspberry Pi one-command installer  
-- [ ] iPad PWA improvements  
+- [ ] Raspberry Pi one-command installer
+- [ ] iPad PWA improvements
 
 ### Phase 4 — Community
-- [ ] Community frame overlay themes  
-- [ ] Zen + Family mode refinements  
-- [ ] Mobile companion app  
+- [ ] Community frame overlay themes
+- [ ] Zen + Family mode refinements
+- [ ] Mobile companion app
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 See [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md). All skill levels welcome!
 
-- 🎨 Designers: SVG frame overlays  
-- 💻 Developers: new effects, modes, hardware support  
-- 📝 Docs: hardware guides, translations  
+- Designers: SVG frame overlays
+- Developers: new effects, modes, hardware support
+- Docs: hardware guides, translations
 
-## 📄 License
+## License
 
-MIT — free for everyone. Share the magic. ✨
+MIT — free for everyone. Share the magic.
